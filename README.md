@@ -29,7 +29,7 @@ Para detalhes profundos sobre a modelagem, acesse os links abaixo (na Wiki later
 
 1.  Clone este repositório:
     ```bash
-    git clone [https://gitlab.com/](https://gitlab.com/)[SEU-USUARIO]/[NOME-DO-REPO].git
+    git clone https://gitlab.com/ufca/cct/es-bd-2025-2/grupo03.git
     ```
 
 ## 👥 Equipe (Grupo 03)
