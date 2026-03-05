@@ -1,44 +1,120 @@
-# Sistema de Monitoramento Ambiental e Engajamento (Tema 9)
+# greenmap ♻️
 
-## 📌 Sobre o Projeto
+Sistema gamificado de gerenciamento de reciclagem e coleta de lixo.
 
-O projeto consiste na modelagem e implementação de um banco de dados para um **Sistema de Monitoramento Ambiental**, focado em mapear pontos de descarte, engajar moradores através de gamificação e medir o impacto ambiental por bairros.
+**Stack:** Python · Streamlit · PostgreSQL · Docker  
+**Disciplina:** Banco de Dados — UFCA 2026
 
-## 🎯 Objetivos do Sistema
+---
 
-O objetivo principal é resolver a desconexão entre cidadãos e pontos de coleta, além de fornecer dados granulares para a gestão pública.
+## Como rodar o projeto
 
-1.  **Mapeamento:** Georreferenciar pontos de descarte (lixo comum, reciclável, eletrônico) e eventos.
-2.  **Engajamento:** Implementar gamificação para incentivar o descarte correto e a participação em eventos (relação N:M).
-3.  **Gestão:** Gerar relatórios de impacto ambiental e eficiência de coleta segregados por bairro.
-4.  **Fiscalização:** Permitir denúncias de descartes irregulares e gestão de manutenção de ecopontos.
+### Pré-requisitos
 
-## 📚 Instruções e documentação
+Você precisa ter instalado **apenas o Docker Desktop**.  
+Baixe em: https://www.docker.com/products/docker-desktop/
+---
 
-Para detalhes profundos sobre a modelagem, acesse os links abaixo (na Wiki lateral):
+### Passo a passo
 
-1.  [Requisitos e User Stories](01-Requisitos-e-Escopo)
-2.  [Modelagem Conceitual (Classes e MER)](02-Modelagem-Conceitual)
+**1. Clone o repositório**
+```bash
+git clone https://gitlab.com/seu-grupo/collector.git
+cd collector
+```
 
+**2. Suba os contêineres**
+```bash
+// abra o Docker Desktop no pc, apenas para carregar
 
-## 🚀 Requisitos para Execução
+// no terminal:
+docker compose up
+```
 
-* **Ferramenta de Modelagem:** Mermaid (para visualização dos diagramas).
+Aguarde aparecer no terminal:
+```
+collector_app  | You can now view your Streamlit app in your browser.
+collector_app  | Local URL: http://localhost:8501
+```
 
-### Como rodar o banco de dados:
+**3. Abra no navegador**
+```
+http://localhost:8501
+```
 
-1.  Clone este repositório:
-    ```bash
-    git clone https://gitlab.com/ufca/cct/es-bd-2025-2/grupo03.git
-    ```
+Pronto. A aplicação está rodando e o banco já foi criado com dados de teste.
 
-## 👥 Equipe (Grupo 03)
+---
 
-* **Jetro Viana** - [jetro.viana@aluno.ufca.edu.br]
-* **José Luiz** - [jose.luiz@aluno.ufca.edu.br]
+### Comandos úteis do Docker
 
-## 📞 Contato e Issues
+| O que fazer | Comando |
+|---|---|
+| Subir tudo | `docker compose up` |
+| Subir em segundo plano | `docker compose up -d` |
+| Ver os logs | `docker compose logs -f` |
+| Parar tudo | `Ctrl+C` ou `docker compose down` |
+| Resetar o banco (apaga dados) | `docker compose down -v` |
+| Reconstruir após mudar requirements.txt | `docker compose up --build` |
 
-Dúvidas ou sugestões podem ser registradas na aba [Issues](../../issues) deste repositório.
+---
 
-> **Status do Projeto:** 🚧 Em Desenvolvimento (Fase de Modelagem Conceitual)
+### Estrutura do projeto
+
+```
+collector/
+├── database/
+│   ├── init.sql          # cria as tabelas (roda automático no Docker)
+│   └── seed.sql          # insere dados de teste (roda automático no Docker)
+├── app/
+│   ├── main.py           # ponto de entrada do Streamlit
+│   ├── db/
+│   │   └── connection.py # conexão com o banco (Singleton)
+│   ├── models/           # dataclasses — representação das tabelas
+│   ├── repositories/     # SQL — acesso ao banco
+│   ├── services/         # regras de negócio
+│   └── views/            # interface Streamlit
+│       ├── morador/      # dashboard e widgets do morador
+│       └── gestor/       # dashboard e widgets do gestor
+├── docker-compose.yml    # define os contêineres
+├── Dockerfile            # define como montar o contêiner da app
+├── requirements.txt      # dependências Python
+└── .env.example          # template de variáveis de ambiente
+```
+
+---
+
+## Decisões de Ajuste (TP1 → TP2)
+
+> Esta seção documenta as mudanças feitas no modelo para o TP2.
+
+### 1. Adição de `execute_returning` na DatabaseConnection
+O psycopg3 precisa de tratamento explícito para `RETURNING` em INSERTs.
+Adicionamos o método `execute_returning()` para capturar o `id` gerado pelo banco
+após inserções em `usuario`, evitando uma segunda query de busca.
+
+### 2. Status de Denuncia expandido
+O MER original tinha apenas `pendente/resolvida`.
+Adicionamos `em_analise` para representar o fluxo real de fiscalização.
+
+### 3. CHECK constraints explícitos
+O modelo lógico não especificava os valores válidos para campos `status`.
+Adicionamos `CHECK (status IN (...))` em `ponto_de_coleta`, `registro_descarte`
+e `denuncia` para garantir integridade no nível do banco.
+
+### 4. Índices adicionais
+Adicionamos índices em colunas frequentemente filtradas
+(`id_bairro`, `status_validacao`, `id_usuario_morador`) para
+melhorar performance das consultas de ranking e relatórios.
+
+---
+
+## Integrantes
+
+| Nome | Responsabilidade principal |
+|---|---|
+| Jetro | Sprint 0 · setup · repos de Evento/Denuncia/Conquista |
+| David | Models (dataclasses) |
+| Carlos | Repos de Morador/Bairro/Gestor/Usuario · Services |
+| Ângelo | Repos de Ponto/Registro/Tipo/Cooperativa |
+| Luiz | UI · Dashboards Morador e Gestor |
