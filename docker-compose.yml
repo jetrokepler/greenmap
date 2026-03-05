@@ -1,0 +1,63 @@
+services:
+  # SERVIÇO 1 — Banco
+  db:
+    image: postgres:16
+    container_name: greenmap_db
+    restart: unless-stopped
+
+    environment:
+      POSTGRES_DB:       greenmap
+      POSTGRES_USER:     greenmap_user
+      POSTGRES_PASSWORD: greenmap_pass
+
+    volumes:
+      # criação de init.sql e seed.sql)
+      - ./database:/docker-entrypoint-initdb.d
+      # persiste os dados entre reinicializações
+      - postgres_data:/var/lib/postgresql/data
+
+    ports:
+      # expõe para inspecionar com DBeaver/pgAdmin
+      - "5432:5432"
+
+    healthcheck:
+      # app só sobe depois que este check passar
+      test: ["CMD-SHELL", "pg_isready -U greenmap_user -d greenmap"]
+      interval: 3s
+      timeout: 5s
+      retries: 10
+
+  # SERVIÇO 2 — Aplicação Streamlit
+  app:
+    build: .
+    container_name: greenmap_app
+    restart: unless-stopped
+
+    environment:
+
+      # "db" é o nome do serviço acima — o Docker resolve o IP automaticamente
+      DB_HOST:     db
+      DB_PORT:     5432
+      DB_NAME:     greenmap
+      DB_USER:     greenmap_user
+      DB_PASSWORD: greenmap_pass
+
+    volumes:
+      # espelha sua pasta local dentro do contêiner em tempo real
+      # edita no VSCode → Streamlit recarrega sem precisar rebuild
+      - .:/app
+
+    ports:
+      - "8501:8501"
+
+    depends_on:
+      db:
+        condition: service_healthy
+
+    command: >
+      streamlit run app/main.py
+        --server.address=0.0.0.0
+        --server.fileWatcherType=poll
+
+volumes:
+  postgres_data:
