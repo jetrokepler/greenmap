@@ -54,11 +54,11 @@ def render_validacoes():
                         )
                         if rows:
                             r = rows[0]
+                            reg_repo.update_validacao(reg["id_registro"], "aprovado", id_cooperativa)
                             pts = gamif_svc.creditar_pontos(
                                 r["id_usuario_morador"], reg["id_registro"],
                                 r["id_tipo"], float(r["peso_estimado"])
                             )
-                            reg_repo.update_validacao(reg["id_registro"], "aprovado", id_cooperativa)
                             st.session_state[f"msg_apr_{reg['id_registro']}"] = pts
                         st.rerun()
                     except Exception as e:

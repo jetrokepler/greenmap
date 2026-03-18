@@ -29,7 +29,7 @@ def render_mapa():
         pontos = ponto_repo.find_by_bairro_tipo(id_bairro, id_tipo)
         st.caption(f"Ecopontos ativos em **{bairro_sel}** que aceitam **{tipo_sel}**")
     elif id_bairro:
-        todos = ponto_repo.find_all()
+        todos = ponto_repo.find_ativos()
         pontos = [p for p in todos if p["id_bairro"] == id_bairro]
     elif id_tipo:
         pontos = ponto_repo.find_by_tipo(id_tipo)

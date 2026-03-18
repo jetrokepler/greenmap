@@ -43,7 +43,8 @@ class DatabaseConnection:
         instance = getattr(cls._local, "instance", None)
         if instance is not None:
             try:
-                instance._conn.cursor().execute("SELECT 1")
+                with instance._conn.cursor() as cur:
+                    cur.execute("SELECT 1")
             except Exception:
                 instance = None
         if instance is None:

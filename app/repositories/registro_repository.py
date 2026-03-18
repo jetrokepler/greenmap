@@ -13,6 +13,14 @@ class RegistroDescarteRepository(BaseRepository):
         )
         return row["id_registro"] if row else -1
 
+    def count_aprovados_by_morador(self, id_usuario: int) -> int:
+        rows = self._fetch(
+            """SELECT COUNT(*) AS total FROM registro_descarte
+               WHERE id_usuario_morador = %s AND status_validacao = 'aprovado'""",
+            (id_usuario,)
+        )
+        return rows[0]["total"] if rows else 0
+
     def find_by_morador(self, id_usuario: int) -> list[dict]:
         """Q3 — histórico parametrizado."""
         return self._fetch(

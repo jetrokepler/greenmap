@@ -36,7 +36,7 @@ class GamificacaoService:
         morador = self._morador_repo.find_by_id(id_usuario)
         if not morador:
             return []
-        descartes = len(self._registro_repo.find_by_morador(id_usuario))
+        descartes = self._registro_repo.count_aprovados_by_morador(id_usuario)
         desbloqueadas = []
         for id_conquista, tipo, valor in self.REGRAS:
             if self._conquista_repo.has_conquista(id_usuario, id_conquista):

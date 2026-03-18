@@ -293,7 +293,6 @@ def menu_validacoes():
         print(f"\n  #{reg['id_registro']} | {reg['nome']} | {reg['nome_categoria']} | {reg['peso_estimado']}kg | {data_str}")
         acao = input("  [a]provar / [r]ejeitar / [p]ular: ").strip().lower()
         if acao == "a":
-            reg_repo.update_validacao(reg["id_registro"], "aprovado", id_coop)
             db = DatabaseConnection.get_instance()
             rows = db.execute(
                 "SELECT id_usuario_morador, id_tipo, peso_estimado FROM registro_descarte WHERE id_registro = %s",
@@ -301,6 +300,7 @@ def menu_validacoes():
             )
             if rows:
                 r = rows[0]
+                reg_repo.update_validacao(reg["id_registro"], "aprovado", id_coop)
                 pts = GamificacaoService().creditar_pontos(
                     r["id_usuario_morador"], reg["id_registro"],
                     r["id_tipo"], float(r["peso_estimado"])
