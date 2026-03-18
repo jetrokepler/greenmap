@@ -34,6 +34,7 @@ services:
     restart: unless-stopped
 
     environment:
+      PYTHONPATH: /app
 
       # "db" é o nome do serviço acima — o Docker resolve o IP automaticamente
       DB_HOST:     db
